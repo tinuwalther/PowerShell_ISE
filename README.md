@@ -18,7 +18,7 @@ Copy the content from Data/user-data/User/profiles/Microsoft.PowerShellISE_profi
 
 ## Snippets
 
-Open PowerShell_ISE, enter the following code in to the code window, and press F5 to run the code:
+If you want to write new PowerShell functions in 3 seconds, then open PowerShell_ISE, enter the following code in to the ISE, and press F5 to run the code:
 
 ````powershell
 $ScriptBlock = @"
@@ -36,46 +36,58 @@ $ScriptBlock = @"
     Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
 #>
 function New-MwaFunction {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$True)]
     param(
+        #region parameter, to add a new parameter, copy and paste the Parameter-region
         [Parameter(
-            Mandatory=`$true,
-            ValueFromPipeline=`$true,
-            ValueFromPipelineByPropertyName=`$true,
+            Mandatory=$true,
+            ValueFromPipeline=$true,
+            ValueFromPipelineByPropertyName=$true,
             Position = 0
         )]
-        [Object] `$InputObject
+        [Object] $InputObject
+        #endregion
     )
 
     begin{
-        `$StartTime = Get-Date
-        `$function = `$(`$MyInvocation.MyCommand.Name)
-        Write-Verbose `$('[', (Get-Date -f 'yyyy-MM-dd HH:mm:ss.fff'), ']', '[ Begin   ]', `$function -Join ' ')
+        #region Do not change this region
+        $StartTime = Get-Date
+        $function = $($MyInvocation.MyCommand.Name)
+        Write-Verbose $('[', (Get-Date -f 'yyyy-MM-dd HH:mm:ss.fff'), ']', '[ Begin   ]', $function -Join ' ')
+        #endregion
     }
 
     process{
-        Write-Verbose `$('[', (Get-Date -f 'yyyy-MM-dd HH:mm:ss.fff'), ']', '[ Process ]', `$function -Join ' ')
-        try{
-            `$ret = [PSCustomObject]`$InputObject
-            throw 'There is something wrong in paradise'
-        }catch{
-            Write-Warning `$('ScriptName:', `$(`$_.InvocationInfo.ScriptName), 'LineNumber:', `$(`$_.InvocationInfo.ScriptLineNumber), 'Message:', `$(`$_.Exception.Message) -Join ' ')
-            `$Error.Clear()
+        Write-Verbose $('[', (Get-Date -f 'yyyy-MM-dd HH:mm:ss.fff'), ']', '[ Process ]', $function -Join ' ')
+        foreach($item in $PSBoundParameters.keys){ $params = "$($params) -$($item) $($PSBoundParameters[$item])" }
+        if ($PSCmdlet.ShouldProcess($params.Trim())){
+            try{
+                $ret = [PSCustomObject]$InputObject
+                if($ret){
+                    $ret
+                }else{
+                    throw 'There is something wrong in paradise'
+                }
+            }catch{
+                Write-Warning $('ScriptName:', $($_.InvocationInfo.ScriptName), 'LineNumber:', $($_.InvocationInfo.ScriptLineNumber), 'Message:', $($_.Exception.Message) -Join ' ')
+                $Error.Clear()
+            }
         }
     }
 
     end{
-        Write-Verbose `$('[', (Get-Date -f 'yyyy-MM-dd HH:mm:ss.fff'), ']', '[ End     ]', `$function -Join ' ')
-        `$TimeSpan  = New-TimeSpan -Start `$StartTime -End (Get-Date)
-        `$Formatted = `$TimeSpan | ForEach-Object {
-            '{1:0}h {2:0}m {3:0}s {4:000}ms' -f `$_.Days, `$_.Hours, `$_.Minutes, `$_.Seconds, `$_.Milliseconds
+        #region Do not change this region
+        Write-Verbose $('[', (Get-Date -f 'yyyy-MM-dd HH:mm:ss.fff'), ']', '[ End     ]', $function -Join ' ')
+        $TimeSpan  = New-TimeSpan -Start $StartTime -End (Get-Date)
+        $Formatted = $TimeSpan | ForEach-Object {
+            '{1:0}h {2:0}m {3:0}s {4:000}ms' -f $_.Days, $_.Hours, $_.Minutes, $_.Seconds, $_.Milliseconds
         }
-        Write-Verbose `$('Finished in:', `$Formatted -Join ' ')
-        return `$ret
+        Write-Verbose $('Finished in:', $Formatted -Join ' ')
+        #endregion
     }
 }
 
-New-MwaFunction -InputObject @{Firstname='Martin';Name='Walther'} -Verbose
+New-MwaFunction -InputObject @{Firstname='Martin';Name='Walther'} -Verbose -WhatIf
 "@
 
 $arguments = @{
