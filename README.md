@@ -22,23 +22,21 @@ If you want to write new PowerShell functions in 3 seconds, then open PowerShell
 
 ````powershell
 $ScriptBlock = @"
-<#
-.SYNOPSIS
-    A short one-line action-based description, e.g. 'Tests if a function is valid'
-.DESCRIPTION
-    A longer description of the function, its purpose, common use cases, etc.
-.PARAMETER InputObject
-    Specify the input of this parameter.
-.NOTES
-    Information or caveats about the function e.g. 'This function is not supported in Linux'
-.EXAMPLE
-    New-MwaFunction @{Name='MyName';Value='MyValue'} -Verbose
-    Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
-#>
 function New-MwaFunction {
+    <#
+    .SYNOPSIS
+        A short one-line action-based description, e.g. 'Tests if a function is valid'
+    .DESCRIPTION
+        A longer description of the function, its purpose, common use cases, etc.
+    .NOTES
+        Information or caveats about the function e.g. 'This function is not supported in Linux'
+    .EXAMPLE
+        New-MwaFunction @{Name='MyName';Value='MyValue'} -Verbose
+        Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
+    #>
     [CmdletBinding(SupportsShouldProcess=$True)]
     param(
-        #region parameter, to add a new parameter, copy and paste the Parameter-region
+        #Specify the input of this parameter.
         [Parameter(
             Mandatory=$true,
             ValueFromPipeline=$true,
@@ -46,7 +44,6 @@ function New-MwaFunction {
             Position = 0
         )]
         [Object] $InputObject
-        #endregion
     )
 
     begin{
